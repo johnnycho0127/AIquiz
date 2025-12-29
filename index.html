@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Quiz Generator</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --bg: #f3f4f6;
+            --card: #ffffff;
+            --text: #1f2937;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            display: grid;
+            gap: 20px;
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--card);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 { margin-top: 0; font-size: 1.5rem; color: var(--primary); }
+        h2 { font-size: 1.2rem; margin-bottom: 15px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
+
+        /* Form Elements */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
+        
+        input[type="text"], 
+        input[type="number"], 
+        select, 
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        button:hover { background-color: #4338ca; }
+        button:disabled { background-color: #9ca3af; cursor: not-allowed; }
+
+        /* Quiz Output Styles */
+        #result-area { display: none; }
+        .question-block {
+            background: #fafafa;
+            border: 1px solid #e5e7eb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .question-text { font-weight: bold; margin-bottom: 10px; }
+        .options label { display: block; margin: 5px 0; cursor: pointer; }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .badge-mc { background: #dbeafe; color: #1e40af; }
+        .badge-ref { background: #fce7f3; color: #9d174d; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div class="card">
+        <h1>📚 AI Quiz Generator</h1>
+        <p>Convert any article or document into a customized quiz for your students.</p>
+        
+        <div class="form-group">
+            <label>Source Material</label>
+            <select id="sourceType" onchange="toggleSourceInput()">
+                <option value="url">Website URL</option>
+                <option value="text">Paste Text / Document Content</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="urlInputGroup">
+            <input type="text" id="urlInput" placeholder="https://en.wikipedia.org/wiki/Photosynthesis">
+        </div>
+
+        <div class="form-group" id="textInputGroup" style="display:none;">
+            <textarea id="textInput" rows="5" placeholder="Paste your article or lecture notes here..."></textarea>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label>Student Level</label>
+                <select id="levelSelect">
+                    <option value="elementary">Elementary School (Simple)</option>
+                    <option value="middle">Middle School (Moderate)</option>
+                    <option value="high">High School (Detailed)</option>
+                    <option value="college">College (Analytical/Complex)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Number of Questions</label>
+                <input type="number" id="qCount" value="5" min="1" max="20">
+            </div>
+        </div>
+
+        <button onclick="generateQuiz()" id="genBtn">Generate Quiz</button>
+    </div>
+
+    <div class="card" id="result-area">
+        <h2>Generated Quiz</h2>
+        <div id="quiz-container"></div>
+        <button onclick="window.print()" style="background:#10b981; margin-top:20px;">Print / Save as PDF</button>
+    </div>
+
+</div>
+
+<script>
+    function toggleSourceInput() {
+        const type = document.getElementById('sourceType').value;
+        if(type === 'url') {
+            document.getElementById('urlInputGroup').style.display = 'block';
+            document.getElementById('textInputGroup').style.display = 'none';
+        } else {
+            document.getElementById('urlInputGroup').style.display = 'none';
+            document.getElementById('textInputGroup').style.display = 'block';
+        }
+    }
+
+    function generateQuiz() {
+        // UI Feedback
+        const btn = document.getElementById('genBtn');
+        const resultArea = document.getElementById('result-area');
+        const container = document.getElementById('quiz-container');
+        
+        btn.innerHTML = "Processing content...";
+        btn.disabled = true;
+        resultArea.style.display = 'none';
+        container.innerHTML = '';
+
+        // Get Inputs
+        const level = document.getElementById('levelSelect').value;
+        const count = document.getElementById('qCount').value;
+
+        // SIMULATION: In a real app, we would send the URL/Text to an OpenAI/Gemini API here.
+        // We will simulate a network delay and generate "mock" questions based on the level.
+        
+        setTimeout(() => {
+            // Generate Mock Data
+            let html = '';
+            for(let i = 1; i <= count; i++) {
+                // Mix of Multiple Choice (every odd) and Reflection (every even)
+                if (i % 2 !== 0) {
+                    html += `
+                    <div class="question-block">
+                        <span class="badge badge-mc">Multiple Choice (${level} level)</span>
+                        <div class="question-text">${i}. Based on the provided text, which of the following best describes the core concept?</div>
+                        <div class="options">
+                            <label><input type="radio" name="q${i}"> Option A: A detailed explanation suitable for ${level} students.</label>
+                            <label><input type="radio" name="q${i}"> Option B: An incorrect distractor.</label>
+                            <label><input type="radio" name="q${i}"> Option C: Another plausible but incorrect option.</label>
+                            <label><input type="radio" name="q${i}"> Option D: The final alternative.</label>
+                        </div>
+                    </div>`;
+                } else {
+                    html += `
+                    <div class="question-block">
+                        <span class="badge badge-ref">Reflection</span>
+                        <div class="question-text">${i}. Reflect on the reading: How does this concept apply to real-world scenarios relevant to a ${level} student?</div>
+                        <textarea style="width:100%; height:80px; margin-top:10px;" placeholder="Student answer goes here..."></textarea>
+                    </div>`;
+                }
+            }
+
+            // Render Results
+            container.innerHTML = html;
+            resultArea.style.display = 'block';
+            btn.innerHTML = "Generate Quiz";
+            btn.disabled = false;
+        }, 1500); // 1.5 second delay to simulate AI thinking
+    }
+</script>
+
+</body>
+</html>
